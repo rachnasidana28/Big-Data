@@ -1,0 +1,19 @@
+
+review_data = load '/rxs156230/input/review.csv' AS line;
+review_file= FOREACH review_data GENERATE FLATTEN((tuple(chararray,chararray,chararray,float))REGEX_EXTRACT_ALL(line,'(.*)\\:\\:(.*)\\:\\:(.*)\\:\\:(.*)'))AS (review_id,user_id,business_id,rating);
+review_group = group review_file by business_id;
+review_avg = foreach review_group generate group as business_id,AVG(review_file.rating) as average_rating;
+
+business_data = load '/rxs156230/input/business.csv' AS line;
+business_file = FOREACH business_data GENERATE FLATTEN((tuple(chararray,chararray,chararray))REGEX_EXTRACT_ALL(line,'(.*)\\:\\:(.*)\\:\\:(.*)')) AS (business_id,address,categories);
+business_Palo = FILTER business_file BY (address matches '.*Palo Alto, CA.*');
+distinct_business_Palo = DISTINCT business_Palo;
+
+join_distinct = join review_avg by business_id, distinct_business_Palo by business_id;
+result_sort = order join_distinct by average_rating desc;
+
+top10 = limit result_sort 10;
+dump top10;
+
+
+

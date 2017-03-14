@@ -1,0 +1,10 @@
+
+review_data = load '/rxs156230/input/review.csv' AS line;
+review_file= FOREACH review_data GENERATE FLATTEN((tuple(chararray,chararray,chararray,float))REGEX_EXTRACT_ALL(line,'(.*)\\:\\:(.*)\\:\\:(.*)\\:\\:(.*)'))AS (review_id,user_id,business_id,rating);
+
+business_data = load '/rxs156230/input/business.csv' AS line;
+business_file = FOREACH business_data GENERATE FLATTEN((tuple(chararray,chararray,chararray))REGEX_EXTRACT_ALL(line,'(.*)\\:\\:(.*)\\:\\:(.*)')) AS (business_id,address,categories);
+
+cogrouping = cogroup review_file by business_id, business_file by business_id;
+lim_cogroup = limit cogrouping 5;
+dump lim_cogroup;
