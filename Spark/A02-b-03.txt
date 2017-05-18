@@ -1,0 +1,5 @@
+val inputData = sc.textFile("hdfs://localhost:54310/input/part3-input.txt")
+val headerData = inputData.first()
+val usefulData = inputData.filter(row => row!=headerData)
+val mapData = usefulData.map(line => line.split("\t")).map(row=>(row(1),BigDecimal(row(2)))).reduceByKey(_+_).sortBy(_._1)
+mapData.collect.foreach(println)
