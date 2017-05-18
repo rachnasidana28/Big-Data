@@ -1,9 +1,0 @@
-val businessInput = sc.textFile("hdfs://localhost:54310/input/business.csv")
-val businessData = businessInput.map(line => line.split("::")).map(row=>(row(0),row(1))).filter(_._2.contains("Stanford,")).distinct()
-val reviewInput = sc.textFile("hdfs://localhost:54310/input/review.csv")
-val reviewData = reviewInput.map(line => line.split("::")).map(row=>(row(2),(row(1),row(3)))).distinct()
-val joinedData = businessData.join(reviewData).distinct.values.values
-
-
-
-joinedData.foreach(println)
