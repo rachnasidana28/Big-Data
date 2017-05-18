@@ -1,0 +1,14 @@
+val reviewInput = sc.textFile("hdfs://localhost:54310/input/review.csv")
+
+val avgRatingData = reviewInput.map(line => line.split("::")).map(row=>(row(2),BigDecimal(row(3)))).mapValues(x => (x, 1)).reduceByKey((x, y) => (x._1 + y._1, x._2 + y._2)).mapValues(y => y._1 / y._2)
+
+val top10Bids = avgRatingData.sortBy(-_._2).collect().take(10)
+
+val top10data=sc.parallelize(top10Bids)
+
+val businessInput = sc.textFile("hdfs://localhost:54310/input/business.csv")
+val businessData = businessInput.map(line => line.split("::")).map(row=>(row(0),(row(1),row(2)))).distinct()
+
+val joinedData = businessData.join(top10data)
+
+joinedData.collect.foreach(println)
